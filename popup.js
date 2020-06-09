@@ -12,8 +12,8 @@ const renderTable = function(source) {
     let td2 = document.createElement('td');
     let td3 = document.createElement('td');
     let result = bowser.parse(source.userAgent);
-    td2.innerText = `${result.os.name}${result.os.version}${result.os.versionName || ''}`;
-    td3.innerText = `${result.browser.name}${result.browser.version}`;
+    td2.innerText = `${result.os.name} ${result.os.versionName || ''} (${result.os.version})`;
+    td3.innerText = `${result.browser.name} ${result.browser.version}`;
     tr.appendChild(td0);
     tr.appendChild(td1);
     tr.appendChild(td2);
