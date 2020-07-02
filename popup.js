@@ -14,6 +14,9 @@ const renderTable = function(source) {
     let result = bowser.parse(source.userAgent);
     td2.innerText = `${result.os.name} ${result.os.versionName || ''} (${result.os.version})`;
     td3.innerText = `${result.browser.name} ${result.browser.version}`;
+    if (['chrome', 'firefox', 'microsoft edge', 'internet explorer'].includes(result.browser.name.toLowerCase())) {
+        td3.classList.add('warning');
+    }
     tr.appendChild(td0);
     tr.appendChild(td1);
     tr.appendChild(td2);
@@ -22,12 +25,13 @@ const renderTable = function(source) {
 }
 
 const callback = function(resultsArray) {
+    alert(callback);
     resultsArray[0].forEach(n => {
         renderTable(n);
     })
 }
 
-const exejs = `
+const findBrowsers = `
     var ccths = window.ccths || document.getElementsByTagName('th');
     var results = [];
     for(var i=0; i<ccths.length; i++) {
@@ -50,9 +54,41 @@ const exejs = `
     results;
 `
 
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.executeScript(
-        tabs[0].id,
-        {code: exejs},
-        callback);
-  });
+if(/meeting\/detail/i.test(window.location.pathname)) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.executeScript(
+            tabs[0].id,
+            {code: findBrowsers},
+            callback);
+        }
+    );
+}
+
+// const callbackForKeyWords = function(resultsArray) {
+//     console.log(resultsArray);
+// }
+
+// const findKeyWords = `
+//     var divs = window.divs || document.getElementsByTagName('div');
+//     var keywordList = [/active device list/, /CAM_UNMUTE_OWN/, /CAM_MUTE_OWN/];
+//     var results = [];
+//     for(var i=0; i<divs.length; i++) {
+//         var text = divs[i].innerText;
+//         keywordList.forEach(function(word){
+//             if (word.test(text)) {
+//                 results.push(text);
+//             }
+//         })
+//     }
+//     results;
+// `;
+
+// if(/Attendance\/FrontEndLogs/i.test(window.location.pathname)) {
+//     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+//         chrome.tabs.executeScript(
+//             tabs[0].id,
+//             {code: callbackForKeyWords},
+//             callback);
+//         }
+//     );
+// }

@@ -3,29 +3,40 @@
     <head>
       <style>
         body {
-            width: 560px;
-            height: 320px;
-            overflow: auto;
-            background: #34495E;
+          width: 560px;
+          height: 320px;
+          overflow: auto;
+          background: #34495E;
         }
         table {
-            margin-top: 20px;
-            color: #fff;
+          margin-top: 20px;
+          color: #fff;
+        }
+        th {
+          text-align: left;
         }
         td {
-            padding: 10px;
-            padding-bottom: 4px;
+          text-align: left;
+          padding: 10px 20px 10px 0;
+          padding-bottom: 4px;
+        }
+        td.warning {
+          color: #ffc107;
         }
       </style>
     </head>
     <body>
-      <table id="result">
+      <table>
+        <thead>
         <tr>
             <th>Name</th>
             <th>Role</th>
             <th>Platform</th>
             <th>Browser</th>
         </tr>
+        </thead>
+        <tbody id="result">
+        </tbody>
       </table>
       <script src="popup.js"></script>
     </body>
