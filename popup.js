@@ -2,8 +2,8 @@
 
 let getBrowsers = document.getElementById('btn-browser-detect');
 
-const renderTable = function(source) {
-    let table = document.getElementById('result');
+const renderBrowser = function(source) {
+    let tbody = document.getElementById('browser');
     let tr = document.createElement('tr');
     let td0 = document.createElement('td');
     td0.innerText = source.name;
@@ -11,48 +11,152 @@ const renderTable = function(source) {
     td1.innerText = source.role;
     let td2 = document.createElement('td');
     let td3 = document.createElement('td');
-    let result = bowser.parse(source.userAgent);
-    td2.innerText = `${result.os.name} ${result.os.versionName || ''} (${result.os.version})`;
-    td3.innerText = `${result.browser.name} ${result.browser.version}`;
+    let result = (source.userAgent && bowser.parse(source.userAgent)) || false;
+    td2.innerText = result && `${result.os.name} ${result.os.versionName || ''} (${result.os.version})` || 'N/A';
+    td3.innerText = result && `${result.browser.name} ${result.browser.version}` || 'N/A';
+    if (result && !['chrome', 'firefox', 'microsoft edge', 'internet explorer'].includes(result.browser.name.toLowerCase())) {
+        td3.classList.add('warning');
+    }
     tr.appendChild(td0);
     tr.appendChild(td1);
     tr.appendChild(td2);
     tr.appendChild(td3);
-    table.appendChild(tr);
+    tbody.appendChild(tr);
+}
+
+function fallbackCopyTextToClipboard(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      var successful = document.execCommand('copy');
+      var msg = successful ? 'successful' : 'unsuccessful';
+      console.log('Fallback: Copying text command was ' + msg);
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+    }
+
+    document.body.removeChild(textArea);
+  }
+  function copyTextToClipboard(text) {
+    if (!navigator.clipboard) {
+      fallbackCopyTextToClipboard(text);
+      return;
+    }
+    navigator.clipboard.writeText(text).then(function() {
+      console.log('Async: Copying to clipboard was successful!');
+    }, function(err) {
+      console.error('Async: Could not copy text: ', err);
+    });
+  }
+
+const replacer = function(match, p1, p2, p3, p4, p5, offset, string) {
+    return '<span>' + [p1, p2, p3, p4, p5].join('</span><span>') + '</span>';
+}
+
+const renderLog = function(source) {
+    let tbody = document.getElementById('log');
+    let tr = document.createElement('tr');
+    let td0 = document.createElement('td');
+    let button = document.createElement('button');
+    button.innerText = 'Copy';
+    button.addEventListener('click', function(e) {
+        copyTextToClipboard(source);
+        button.innerText = 'Copied!';
+        button.classList.add('copied');
+    });
+    td0.appendChild(button);
+    let td1 = document.createElement('td');
+    td1.classList.add('wrap');
+    td1.innerHTML = source.replace(/(active device list)|(CAM_MUTE_OWN)|(CAM_UNMUTE_OWN)|(MIC_MUTE_OWN)|(MIC_UNMUTE_OWN)/i, replacer);
+    tr.appendChild(td0);
+    tr.appendChild(td1);
+    tbody.appendChild(tr);
+}
+
+const renderEmpty = function() {
+    let tbody = document.getElementById('log');
+    let tr = document.createElement('tr');
+    let td = document.createElement('td');
+    td.colSpan = 2;
+    td.innerText = 'No Keyword found.';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
 }
 
 const callback = function(resultsArray) {
-    resultsArray[0].forEach(n => {
-        renderTable(n);
-    })
+    const flag = resultsArray[0].shift();
+    if (flag === 0) {
+        resultsArray[0].forEach(n => {
+            renderBrowser(n);
+        });
+        document.getElementById('browsers').classList.remove('hide');
+    } else if (flag === 1) {
+        if (!resultsArray[0].length) {
+            renderEmpty();
+        }
+        resultsArray[0].forEach(n => {
+            renderLog(n);
+        })
+        document.getElementById('logs').classList.remove('hide');
+    }
 }
 
 const exejs = `
-    var ccths = window.ccths || document.getElementsByTagName('th');
     var results = [];
-    for(var i=0; i<ccths.length; i++) {
-        var userAgent = ccths[i].innerText;
-        if (/UserAgent/i.test(userAgent)) {
-            var tb = ccths[i].parentElement.parentElement.parentElement;
-            var trs = tb.getElementsByTagName('tr');
-            for (var j=1;j<trs.length;j++) {
-                var tds = trs[j].getElementsByTagName('td');
-                if (tds.length > 6) {
-                    results.push({
-                        name: tds[2].innerText,
-                        role: tds[3].innerText,
-                        userAgent: tds[6].innerText.replace(/\\d{3}.\\d{3}.\\d{3}.\\d{3}/, '')
-                    });
+    if(/meeting\\/detail/i.test(window.location.pathname)) {
+        results.push(0);
+        var ccths = document.getElementsByTagName('th');
+        for(var i=0; i<ccths.length; i++) {
+            var userAgent = ccths[i].innerText;
+            if (/UserAgent/i.test(userAgent)) {
+                var tb = ccths[i].parentElement.parentElement.parentElement;
+                var trs = tb.getElementsByTagName('tr');
+                for (var j=1;j<trs.length;j++) {
+                    var tds = trs[j].getElementsByTagName('td');
+                    if (tds.length > 6) {
+                        results.push({
+                            name: tds[2].innerText,
+                            role: tds[3].innerText,
+                            userAgent: tds[6].innerText.replace(/\\d{3}.\\d{3}.\\d{3}.\\d{3}/, '')
+                        });
+                    }
                 }
+            }
+        }
+    } else if (/Attendance\\/FrontEndLogs/i.test(window.location.pathname)) {
+        results.push(1);
+        var logsDiv = document.getElementById('LogDisplay')
+        var divs = logsDiv.getElementsByTagName('div');
+        for(var i=0; i<divs.length; i++) {
+            var text = divs[i].innerText;
+            if (
+                /active device list/i.test(text) ||
+                /CAM_MUTE_OWN/i.test(text) ||
+                /CAM_UNMUTE_OWN/i.test(text) ||
+                /MIC_MUTE_OWN/i.test(text) ||
+                /MIC_UNMUTE_OWN/i.test(text)
+            ) {
+                results.push(text);
             }
         }
     }
     results;
 `
 
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.executeScript(
         tabs[0].id,
         {code: exejs},
         callback);
-  });
+    }
+);
