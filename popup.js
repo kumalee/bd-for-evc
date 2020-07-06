@@ -14,7 +14,7 @@ const renderBrowser = function(source) {
     let result = (source.userAgent && bowser.parse(source.userAgent)) || false;
     td2.innerText = result && `${result.os.name} ${result.os.versionName || ''} (${result.os.version})` || 'N/A';
     td3.innerText = result && `${result.browser.name} ${result.browser.version}` || 'N/A';
-    if (result && !['chrome', 'firefox', 'microsoft edge', 'internet explorer'].includes(result.browser.name.toLowerCase())) {
+    if (result && !['chrome', 'firefox'].includes(result.browser.name.toLowerCase())) {
         td3.classList.add('warning');
     }
     tr.appendChild(td0);
