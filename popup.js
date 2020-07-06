@@ -59,8 +59,8 @@ function fallbackCopyTextToClipboard(text) {
     });
   }
 
-const replacer = function(match, p1, p2, p3, p4, p5, offset, string) {
-    return '<span>' + [p1, p2, p3, p4, p5].join('</span><span>') + '</span>';
+const replacer = function(match, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, offset, string) {
+    return '<span>' + [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11].join('</span><span>') + '</span>';
 }
 
 const renderLog = function(source) {
@@ -77,7 +77,7 @@ const renderLog = function(source) {
     td0.appendChild(button);
     let td1 = document.createElement('td');
     td1.classList.add('wrap');
-    td1.innerHTML = source.replace(/(active device list)|(CAM_MUTE_OWN)|(CAM_UNMUTE_OWN)|(MIC_MUTE_OWN)|(MIC_UNMUTE_OWN)/i, replacer);
+    td1.innerHTML = source.replace(/(CAM_MUTE_OWN)|(CAM_UNMUTE_OWN)|(CAM_MUTE_OTHER)|(CAM_UNMUTE_OTHER)|(MIC_MUTE_OWN)|(MIC_UNMUTE_OWN)|(MIC_MUTE_OTHER)|(MIC_UNMUTE_OTHER)|(RELOAD_APP)|(Invalid XHR response)|(\[renderer \(DOP\)\] loading done)/i, replacer);
     tr.appendChild(td0);
     tr.appendChild(td1);
     tbody.appendChild(tr);
@@ -140,11 +140,17 @@ const exejs = `
         for(var i=0; i<divs.length; i++) {
             var text = divs[i].innerText;
             if (
-                /active device list/i.test(text) ||
                 /CAM_MUTE_OWN/i.test(text) ||
                 /CAM_UNMUTE_OWN/i.test(text) ||
+                /CAM_MUTE_OTHER/i.test(text) ||
+                /CAM_UNMUTE_OTHER/i.test(text) ||
                 /MIC_MUTE_OWN/i.test(text) ||
-                /MIC_UNMUTE_OWN/i.test(text)
+                /MIC_UNMUTE_OWN/i.test(text) ||
+                /MIC_MUTE_OTHER/i.test(text) ||
+                /MIC_UNMUTE_OTHER/i.test(text) ||
+                /RELOAD_APP/i.test(text) ||
+                /Invalid XHR response/i.test(text) ||
+                /\[renderer \(DOP\)\] loading done/i.test(text)
             ) {
                 results.push(text);
             }
