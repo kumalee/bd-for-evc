@@ -127,7 +127,7 @@ const exejs = `
                         results.push({
                             name: tds[2].innerText,
                             role: tds[3].innerText,
-                            userAgent: tds[6].innerText.replace(/\\d{3}.\\d{3}.\\d{3}.\\d{3}/, '')
+                            userAgent: tds[6].innerText.split('\\n')[0]
                         });
                     }
                 }
