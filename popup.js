@@ -125,9 +125,9 @@ const exejs = `
                     var tds = trs[j].getElementsByTagName('td');
                     if (tds.length > 6) {
                         results.push({
-                            name: tds[2].innerText,
-                            role: tds[3].innerText,
-                            userAgent: tds[6].innerText.split('\\n')[0]
+                            name: tds[3].innerText,
+                            role: tds[4].innerText,
+                            userAgent: tds[7].innerText.split('\\n')[0]
                         });
                     }
                 }

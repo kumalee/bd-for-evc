@@ -1,6 +1,6 @@
 {
     "name": "Browser Detector For CC",
-    "version": "1.0",
+    "version": "1.0.1",
     "description": "Recognize user's browser for EVC CR system",
     "permissions": ["activeTab", "declarativeContent"],
     "background": {
